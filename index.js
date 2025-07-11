@@ -1,8 +1,9 @@
 
 const API_URL = "https://fsa-puppy-bowl.herokuapp.com/api/2505-FTB-CT-WEB-PT";
 const $form = document.querySelector("form");
-const $main = document.querySelector("main");
+ const $main = document.querySelector("main");
 const $loading = document.querySelector("#loading-screen")
+ const $app = document.querySelector("#app");
 let teams = [];
 
 function showLoading () {
@@ -17,50 +18,92 @@ async function fetchAllPlayers () {
     const playerArr = [];
     try {
         // see "Get all players"
-    let response = await fetch(API_URL + "jodsonC/players");
+    let response = await fetch(`${API_URL}-JodsonC/players`);
     let result = await response.join();
     playerArr = result.data.players;
     console.log(playerArr);
+    // return playerArr;
     } catch (err) {
         console.error(err.message);
     }
-    return playerArr;
+    // return playerArr;
+    Render();
 }
 
 async function createPlayer (name, breed, imageUrl) {
+   const newPlayer = {
+    name: name,
+    breed: breed,
+    imageUrl: imageUrl,
+   };
+   
     try {
         // see "Invite a new player"
-        
-        return json.data.newPlayer;
+        const response = await fetch(
+            (API_URL + "JodsonC/players"),
+        {
+        method: "POST",
+        headers: {
+            "content-Type": "application/json",
+        },
+        body: json.stringify(newPlayer)
+        }
+    );
+        // return json.data.newPlayer;
     } catch (err) {
         console.error(err.message);
     }
 }
 
 async function fetchPlayerById (id) {
+    
     try {
         // see "Get a player by ID"
+    const response = await fetch(`${API_URL}-JodsonC/players/`);
+    const result = await response.join();
+    const playerObj = result.data.player;
+    console.log(playerObj);
     } catch (err) {
         console.error(err.message);
     }
+    
 }
+// fetchPlayerById("ID");
 
 async function removePlayerById (id) {
     try {
         // see "Remove a player by ID"
         // remember to set method
+        const response = await fetch(
+        (`${API_URL}-JodsonC/players/${id}`),
+     {
+        method: "DELETE",
+        headers: {
+            "content-Type": "application/json",
+        },
+     }
+ );
     } catch (err) {
         console.error(err.message);
     }
 }
+// removePlayerById("id");
 
 async function fetchAllTeams () {
+    let teamArr = [];
+
     try {
         // see "Get all teams"
+        const response = await fetch(API_URL + "JodsonC/teams")
+        const result = await response.json();
+        teamArr = result.data.teams;
+        console.log(result);
     } catch (err) {
         console.error(err.message);
     }
+    return teamArr;
 }
+// fetchAllTeams();
 
 async function renderAllPlayers () {
     const playerList = await fetchAllPlayers();
@@ -83,13 +126,13 @@ async function renderAllPlayers () {
         $removeBtn = $player.querySelector(".remove-btn");
 
         $detailsBtn.addEventListener("click", async () => {
-            showLoading();
+            // showLoading();
             try {
                 await renderSinglePlayer(player.id);
             } catch (err) {
                 console.error(err.message);
             } finally {
-                hideLoading();
+                // hideLoading();
             }
         });
 
@@ -97,13 +140,13 @@ async function renderAllPlayers () {
             try {
                 const confirmRemove = confirm(`Are you sure you want to remove ${player.name} from the roster?`);
                 if (!confirmRemove) return;
-                showLoading();
+                // showLoading();
                 await removePlayerById(player.id);
                 await renderAllPlayers();
             } catch (err) {
                 console.error(err.message);
             } finally {
-                hideLoading();
+                // hideLoading();
             }
         })
 
@@ -127,15 +170,21 @@ async function renderSinglePlayer (id) {
     `;
 
     $main.querySelector("#back-btn").addEventListener("click", async () => {
-        showLoading();
+        // showLoading();
         try {
             await renderAllPlayers();
         } catch (err) {
             console.error(err.message);
         } finally {
-            hideLoading();
+            // hideLoading();
         }
     });
+}
+
+const Render = () => {
+    `
+    <h1>
+    `
 }
 
 async function init () {
@@ -145,7 +194,7 @@ async function init () {
     } catch (err) {
         console.error(err);
     } finally {
-        hideLoading();
+        // hideLoading();
     }
 }
 
@@ -155,17 +204,17 @@ $form.addEventListener("submit", async (e) => {
     const breed = document.querySelector("#new-breed").value;
     const image = document.querySelector("#new-image").value;
     
-    showLoading();
+    // showLoading();
     try {
         await createPlayer(name, breed, image);
         renderAllPlayers();
     } catch (err) {
         console.error(err.message);
-    } finally {
+    // } finally {
         document.querySelector("#new-name").value = "";
         document.querySelector("#new-breed").value = "";
         document.querySelector("#new-image").value = "";
-        hideLoading();
+        // hideLoading();
     }
 })
 
