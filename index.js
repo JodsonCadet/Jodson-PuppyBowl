@@ -27,7 +27,6 @@ async function fetchAllPlayers () {
         console.error(err.message);
     }
     // return playerArr;
-    Render();
 }
 
 async function createPlayer (name, breed, imageUrl) {
