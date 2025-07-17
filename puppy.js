@@ -19,12 +19,12 @@ async function fetchAllPlayers () {
 
 async function fetchPlayerById (id) {
     try {
-        const response = await fetch (`${API}/players ${id}`);
+        const response = await fetch (`${API}/players/${id}`);
         const result = await response.json();
-        return result.data.players;
+        return result.data.player;
     } catch (err) {
         console.error(err.message);
-        return[];
+        return null;
     }
 }
 const playerListItems = (player) => {
@@ -40,6 +40,16 @@ const playerListItems = (player) => {
     });
     return $li; 
 }
+// This function resizes the player images in the list to a smaller size
+// to fit better in the layout.
+// const resizePlayerImages = () => {
+//     const images = document.querySelectorAll(".player-list img");
+//     images.forEach(img => {
+//         img.style.width = "10px";
+//         img.style.height = "auto";
+//         img.style.objectFit = "cover";
+//     });
+// };
 
 const playerList = (players) => {
     const $ul = document.createElement("ul");
@@ -52,7 +62,7 @@ const playerList = (players) => {
 }
 
 const renderSinglePlayer = (player) => {
-    const $selection = document.querySelector("#selected");
+    const $selected = document.querySelector("#selected");
     $selected.innerHTML= `
     <h2>${player.name}</h2>
     <p>${player.breed}</p>
@@ -62,19 +72,34 @@ const renderSinglePlayer = (player) => {
      <button class="remove-btn">Remove Player</button>
      </section>
     `;
-    const $removeBtn = $selection.querySelector(".remove-btn");
+    const $removeBtn = $selected.querySelector(".remove-btn");
     $removeBtn.addEventListener("click", async () => {
-    const confirm = confirm("Please confirm. This action cannot be undone.")
-    if (!confirm) return
-    try{
-        await removePlayerById(player.id);
-        await init();
-    } catch (error) {
-        console.log(error);
-    }
-    })
+        const confirmed = window.confirm("Please confirm. This action cannot be undone.");
+        if (!confirmed) return;
+        try{
+            await removePlayerById(player.id);
+            await init();
+        } catch (error) {
+            console.log(error);
+        }
+    });
 }
-
+async function removePlayerById(id) {
+    try {
+        const response = await fetch(`${API}/players/${id}`, {
+            method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+            return result;
+        } else {
+            throw new Error(result.error || "Failed to remove player.");
+        }
+    } catch (err) {
+        console.error("Error deleting player:", err);
+        return null;
+    }
+}
        
     const addNewPlayer = () => {
     const $form = document.createElement("form");
@@ -84,7 +109,7 @@ const renderSinglePlayer = (player) => {
  </div>
    <div class="form-group">
     <label for="Breed">Breed</label>
-    <input class="form-control" id="newPlayerBreed" placeholder="French, Norweign, English">
+    <input class="form-control" id="newPlayerBreed" placeholder="French, Norwegian, English">
   </div>
    <div class="form-group">
     <label for="status">Status:</label>
